@@ -3,21 +3,26 @@ package scheduler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.TreeSet;
 
 import scheduler.queue.Queue;
 import scheduler.queue.types.QueueType;
+import scheduler.queue.types.RounRobinQueueType;
 
 public class CPUScheduler {
   private boolean preemptive;
   private Queue queue;
   private ArrayList<Insertion> insertions;
   private ArrayList<Execution> executionList;
+  private ArrayList<Process> processes;
 
   public CPUScheduler(QueueType queueType, boolean preemptive) {
     queue = new Queue(queueType);
     this.preemptive = preemptive;
     insertions = new ArrayList<>();
     executionList = new ArrayList<>();
+    processes = new ArrayList<>();
   }
 
   public void makeInsertion(Process process, int timeOfInsertion) {
@@ -34,6 +39,7 @@ public class CPUScheduler {
 
       // Add processes
       while (!insertions.isEmpty() && t == insertions.get(0).getTimeOfInsertion()) {
+        processes.add(insertions.get(0).getProcess());
         queue.add(insertions.get(0).getProcess());
         insertions.remove(0);
       }
@@ -47,10 +53,14 @@ public class CPUScheduler {
         } else if (preemptive) {
           boolean switchProcess = false;
 
-          if (queue.getQueueType() == QueueType.SHORTEST_REMAINING_TIME) {
+          if (queue.getQueueType() == QueueType.FCFS) {
+            switchProcess = false;
+          } else if (queue.getQueueType() == QueueType.SHORTEST_REMAINING_TIME) {
             switchProcess = (runningProcess.getRemainingTime() > queue.getFirst().getRemainingTime());
           } else if (queue.getQueueType() == QueueType.PRIORITY) {
             switchProcess = (runningProcess.getPriority() > queue.getFirst().getPriority());
+          } else if (queue.getQueueType() instanceof RounRobinQueueType) {
+            switchProcess = (execution.getEndTime() - execution.getStartTime()) >= ((RounRobinQueueType) queue.getQueueType()).getPeriod();
           }
 
           if (switchProcess) {
@@ -79,8 +89,8 @@ public class CPUScheduler {
         }
       }
     }
-
-    printTimeline();
+    
+    (new Viewer(processes, executionList)).view();
   }
 
   public void printQueue() {
@@ -89,16 +99,6 @@ public class CPUScheduler {
     }
   }
 
-  public void printTimeline() {
-    System.out.println("\n\nTimeline ([From, To]: Process Name)");
-    System.out.println("==================");
-
-    System.out.printf("\n");
-
-    for (Execution execution : executionList) {
-      System.out.printf("[%d, %d]: %s\n", execution.getStartTime(), execution.getEndTime(), execution.getProcess().getProcessName());
-    }
-  }
 }
 
 class Insertion implements Comparable<Insertion> {

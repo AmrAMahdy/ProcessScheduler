@@ -16,4 +16,5 @@ public interface QueueType {
   public final QueueType FCFS = new FCFSQueueType();
   public final QueueType PRIORITY = new PriorityQueueType();
   public final QueueType SHORTEST_REMAINING_TIME = new SRTQueueType();
+  public final QueueType ROUND_ROBIN = new RounRobinQueueType(Integer.MAX_VALUE);
 }
