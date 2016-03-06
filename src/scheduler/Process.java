@@ -3,26 +3,41 @@ package scheduler;
 public class Process {
   private String processName;
   private int pid;
-  private int time;
+  private int duration;
+  private int remainingTime;
   private int priority;
 
   public Process(String processName, int pid, int time, int priority) {
     this.processName = processName;
     this.pid = pid;
-    this.time = time;
+    this.duration = time;
     this.priority = priority;
+    remainingTime = duration;
   }
 
   public Process(int pid) {
     this(null, pid, 0, -1);
   }
 
-  public void setTime(int time) {
-    this.time = time;
+  public void decrementRemiainingTime() {
+    if (!isFinished())
+      remainingTime--;
   }
 
-  public int getTime() {
-    return time;
+  public int getRemainingTime() {
+    return remainingTime;
+  }
+
+  public boolean isFinished() {
+    return remainingTime == 0;
+  }
+
+  public void setDuration(int time) {
+    this.duration = time;
+  }
+
+  public int getduration() {
+    return duration;
   }
 
   public String getProcessName() {
@@ -51,6 +66,6 @@ public class Process {
 
   @Override
   public String toString() {
-    return String.format("Process: { Name: %s, PID: %d }", processName, pid);
+    return String.format("Process: { name: %s, PID: %d, duration: %d, remaining_time: %d }", processName, pid, duration, remainingTime);
   }
 }
