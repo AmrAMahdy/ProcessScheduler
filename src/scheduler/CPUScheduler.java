@@ -25,8 +25,9 @@ public class CPUScheduler {
   public void startExecution() {
     Collections.sort(insertions);
 
+    Process runningProcess = null;
     Execution execution = null;
-    for (int t = 0; !insertions.isEmpty() || !queue.isEmpty(); t++) {
+    for (int t = 0; !insertions.isEmpty() || !queue.isEmpty() || runningProcess != null; t++) {
       System.out.println("<<<<  Time #" + t + "  >>>>");
 
       // Add processes
@@ -35,26 +36,25 @@ public class CPUScheduler {
         insertions.remove(0);
       }
 
+      // Select Process
+      if (runningProcess == null && !queue.isEmpty()) {
+        runningProcess = queue.getFirst();
+        queue.remove();
+        execution = new Execution(runningProcess, t, t);
+      }
+
+      System.out.println(" -> " + runningProcess);
       printQueue();
 
       // Execute unit time of a process
-      if (!queue.isEmpty()) {
-        if (execution == null) {
-          execution = new Execution(queue.getFirst(), t, t);
-        }
-
-        if (execution != null && queue.getFirst() != execution.getProcess()) {
-          executionList.add(execution);
-          execution = new Execution(queue.getFirst(), t, t);
-        }
-
-        queue.getFirst().decrementRemiainingTime();
+      if (runningProcess != null) {
+        runningProcess.decrementRemiainingTime();
         execution.setEndTime(execution.getEndTime() + 1);
 
         // Remove process from queue and add an execution entry
-        if (queue.getFirst().isFinished()) {
-          queue.remove();
+        if (runningProcess.isFinished()) {
           executionList.add(execution);
+          runningProcess = null;
           execution = null;
         }
       }
@@ -64,11 +64,8 @@ public class CPUScheduler {
   }
 
   public void printQueue() {
-    boolean first = true;
-
     for (Process process : queue) {
-      System.out.println((first ? " -> " : "    ") + process);
-      first = false;
+      System.out.println("    " + process);
     }
   }
 
