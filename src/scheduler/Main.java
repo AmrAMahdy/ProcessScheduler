@@ -12,13 +12,14 @@ public class Main {
   public static void main(String[] args) {
     runTests();
 
-    CPUScheduler cpu = new CPUScheduler(QueueType.FCFS);
+    CPUScheduler cpu = new CPUScheduler(QueueType.PRIORITY, true);
 
-    cpu.makeInsertion(new Process("P1", 1, 5, 1), 0);
-    cpu.makeInsertion(new Process("P2", 2, 3, 1), 2);
-    cpu.makeInsertion(new Process("P3", 3, 6, 1), 4);
+    cpu.makeInsertion(new Process("P1", 1, 5, 5), 0);
+    cpu.makeInsertion(new Process("P2", 2, 3, 3), 2);
+    cpu.makeInsertion(new Process("P3", 3, 6, 2), 4);
     cpu.makeInsertion(new Process("P4", 4, 4, 1), 5);
     cpu.makeInsertion(new Process("P5", 5, 3, 1), 7);
+    cpu.makeInsertion(new Process("P6", 6, 4, 1), 8);
 
     cpu.printQueue();
     cpu.startExecution();

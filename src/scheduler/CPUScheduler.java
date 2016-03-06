@@ -8,12 +8,14 @@ import scheduler.queue.Queue;
 import scheduler.queue.types.QueueType;
 
 public class CPUScheduler {
+  private boolean preemptive;
   private Queue queue;
   private ArrayList<Insertion> insertions;
   private ArrayList<Execution> executionList;
 
-  public CPUScheduler(QueueType queueType) {
+  public CPUScheduler(QueueType queueType, boolean preemptive) {
     queue = new Queue(queueType);
+    this.preemptive = preemptive;
     insertions = new ArrayList<>();
     executionList = new ArrayList<>();
   }
@@ -37,10 +39,28 @@ public class CPUScheduler {
       }
 
       // Select Process
-      if (runningProcess == null && !queue.isEmpty()) {
-        runningProcess = queue.getFirst();
-        queue.remove();
-        execution = new Execution(runningProcess, t, t);
+      if (!queue.isEmpty()) {
+        if (runningProcess == null) {
+          runningProcess = queue.getFirst();
+          queue.remove();
+          execution = new Execution(runningProcess, t, t);
+        } else if (preemptive) {
+          boolean switchProcess = false;
+
+          if (queue.getQueueType() == QueueType.SHORTEST_REMAINING_TIME) {
+            switchProcess = (runningProcess.getRemainingTime() > queue.getFirst().getRemainingTime());
+          } else if (queue.getQueueType() == QueueType.PRIORITY) {
+            switchProcess = (runningProcess.getPriority() > queue.getFirst().getPriority());
+          }
+
+          if (switchProcess) {
+            executionList.add(execution);
+            queue.add(runningProcess);
+            runningProcess = queue.getFirst();
+            queue.remove();
+            execution = new Execution(runningProcess, t, t);
+          }
+        }
       }
 
       System.out.println(" -> " + runningProcess);

@@ -45,6 +45,10 @@ public class Queue implements Iterable<Process> {
     this.queueType = queueType;
   }
 
+  public QueueType getQueueType() {
+    return queueType;
+  }
+
   @Override
   public Iterator<Process> iterator() {
     return new Iterator<Process>() {

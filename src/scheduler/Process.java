@@ -66,6 +66,6 @@ public class Process {
 
   @Override
   public String toString() {
-    return String.format("Process: { name: %s, PID: %d, duration: %d, remaining_time: %d }", processName, pid, duration, remainingTime);
+    return String.format("Process: { name: %s, PID: %d, duration: %d, remaining_time: %d, priority: %d }", processName, pid, duration, remainingTime,priority);
   }
 }
