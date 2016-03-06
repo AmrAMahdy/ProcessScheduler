@@ -29,37 +29,35 @@ public class CPUScheduler {
     for (int t = 0; !insertions.isEmpty() || !queue.isEmpty(); t++) {
       System.out.println("<<<<  Time #" + t + "  >>>>");
 
-      // Execute unit time of a process
-      if (!queue.isEmpty()) {
-        queue.getFirst().decrementRemiainingTime();
-
-        // Remove process from queue and add an execution entry
-        if (queue.getFirst().isFinished()) {
-          queue.remove();
-          execution.setEndTime(t);
-          executionList.add(execution);
-          execution = null;
-        }
-      }
-
-      // Skip adding if no process needs to be added
-      if (!insertions.isEmpty() && t < insertions.get(0).getTimeOfInsertion()) {
-        printQueue();
-        continue;
-      }
-
       // Add processes
       while (!insertions.isEmpty() && t == insertions.get(0).getTimeOfInsertion()) {
         queue.add(insertions.get(0).getProcess());
         insertions.remove(0);
       }
 
-      // Create new execution entry
-      if (execution == null && !queue.isEmpty()) {
-        execution = new Execution(queue.getFirst(), t, -1);
-      }
-
       printQueue();
+
+      // Execute unit time of a process
+      if (!queue.isEmpty()) {
+        if (execution == null) {
+          execution = new Execution(queue.getFirst(), t, t);
+        }
+
+        if (execution != null && queue.getFirst() != execution.getProcess()) {
+          executionList.add(execution);
+          execution = new Execution(queue.getFirst(), t, t);
+        }
+
+        queue.getFirst().decrementRemiainingTime();
+        execution.setEndTime(execution.getEndTime() + 1);
+
+        // Remove process from queue and add an execution entry
+        if (queue.getFirst().isFinished()) {
+          queue.remove();
+          executionList.add(execution);
+          execution = null;
+        }
+      }
     }
 
     printTimeline();
